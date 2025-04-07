@@ -15,10 +15,15 @@ if not openai_api_key:
 llm = OpenAI(openai_api_key=openai_api_key)
 embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
 
-st.title("AI Agent for Document & Text Q&A")
-st.sidebar.header("Configuration")
-st.sidebar.markdown("Enter your OpenAI API key in the `.env` file.")
-
+st.title("AskMeText")
+st.sidebar.header("AI Agent for Document & Text Q&A")
+st.sidebar.markdown(
+    """
+    This application allows you to ask questions about documents or direct text using OpenAI's language model.
+    - Upload a text or PDF document to get answers based on its content.
+    - Ask questions about any direct text you provide.
+    """
+)
 # Document Q&A Section
 st.subheader("Ask Questions About a Document")
 uploaded_file = st.file_uploader("Upload a text or PDF document", type=["txt", "pdf"])
