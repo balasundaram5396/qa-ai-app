@@ -4,14 +4,12 @@ from langchain.document_loaders import TextLoader, PyPDFLoader, UnstructuredFile
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
-from dotenv import load_dotenv
-import os
+import os # No need for dotenv anymore in deployed environment
 
-load_dotenv()
-openai_api_key = os.getenv("OPENAI_API_KEY")
+openai_api_key = st.secrets["OPENAI_API_KEY"]
 
-if openai_api_key is None:
-    st.error("OpenAI API key not found. Please create a .env file with your OPENAI_API_KEY.")
+if not openai_api_key:
+    st.error("OpenAI API key not found in Streamlit Secrets.")
     st.stop()
 
 llm = OpenAI(openai_api_key=openai_api_key)
@@ -24,9 +22,8 @@ st.sidebar.markdown("Enter your OpenAI API key in the `.env` file.")
 # Document Q&A Section
 st.subheader("Ask Questions About a Document")
 uploaded_file = st.file_uploader("Upload a text or PDF document", type=["txt", "pdf"])
-question = st.text_input("Your Question:")
-
-if uploaded_file is not None and question:
+question_doc = st.text_input("Your Question:", key="question_doc")
+if uploaded_file is not None and question_doc:
     with st.spinner("Processing document and generating answer..."):
         try:
             file_extension = uploaded_file.name.split(".")[-1].lower()
@@ -42,7 +39,7 @@ if uploaded_file is not None and question:
 
             db = Chroma.from_documents(documents, embeddings)
             qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=db.as_retriever())
-            response = qa.run(question)
+            response = qa.run(question_doc)
             st.success(f"Answer: {response}")
 
         except Exception as e:
@@ -53,8 +50,7 @@ st.markdown("---")
 # Direct Text Q&A Section
 st.subheader("Ask Questions About Direct Text")
 direct_text = st.text_area("Enter your text here:", height=150)
-direct_question = st.text_input("Your Question:")
-
+direct_question = st.text_input("Your Question:", key="question_direct")
 if direct_text and direct_question:
     with st.spinner("Generating answer..."):
         try:
