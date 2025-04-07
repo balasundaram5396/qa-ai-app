@@ -2,13 +2,14 @@
 
 This application allows users to upload text documents (TXT, PDF) or paste text directly and ask questions about the content using the power of Large Language Models (LLMs).
 
+Check it out : https://askmetext.streamlit.app/
+
 ## Features
 
 * **Document Upload:** Supports TXT and PDF file uploads.
 * **Direct Text Input:** Allows users to paste text directly for Q&A.
 * **Question Answering:** Uses Langchain and OpenAI to generate answers based on the provided text.
 * **Simple and Clean UI:** Built with Streamlit for an easy-to-use interface.
-* **Free Deployment:** Deployed using the free tier of Streamlit Community Cloud.
 
 ## Technologies Used
 
