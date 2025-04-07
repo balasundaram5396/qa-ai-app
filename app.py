@@ -17,44 +17,48 @@ if openai_api_key is None:
 llm = OpenAI(openai_api_key=openai_api_key)
 embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
 
-st.title("Document Q&A Agent")
+st.title("AI Agent for Document & Text Q&A")
+st.sidebar.header("Configuration")
+st.sidebar.markdown("Enter your OpenAI API key in the `.env` file.")
 
+# Document Q&A Section
+st.subheader("Ask Questions About a Document")
 uploaded_file = st.file_uploader("Upload a text or PDF document", type=["txt", "pdf"])
-question = st.text_input("Ask a question about the document:")
+question = st.text_input("Your Question:")
 
 if uploaded_file is not None and question:
-    try:
-        file_extension = uploaded_file.name.split(".")[-1].lower()
-        if file_extension == "pdf":
-            loader = PyPDFLoader(uploaded_file)
-            documents = loader.load()
-        elif file_extension == "txt":
-            loader = TextLoader(uploaded_file)
-            documents = loader.load()
-        else:
-            loader = UnstructuredFileLoader(uploaded_file.name) # Try unstructured as a fallback
-            documents = loader.load()
+    with st.spinner("Processing document and generating answer..."):
+        try:
+            file_extension = uploaded_file.name.split(".")[-1].lower()
+            if file_extension == "pdf":
+                loader = PyPDFLoader(uploaded_file)
+                documents = loader.load()
+            elif file_extension == "txt":
+                loader = TextLoader(uploaded_file)
+                documents = loader.load()
+            else:
+                loader = UnstructuredFileLoader(uploaded_file)
+                documents = loader.load()
 
-        # Create embeddings and store in a vector database
-        db = Chroma.from_documents(documents, embeddings)
+            db = Chroma.from_documents(documents, embeddings)
+            qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=db.as_retriever())
+            response = qa.run(question)
+            st.success(f"Answer: {response}")
 
-        # Create a retrieval-based question answering system
-        qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=db.as_retriever())
-
-        response = qa.run(question)
-        st.success(response)
-
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
+        except Exception as e:
+            st.error(f"Error processing the document: {e}")
 
 st.markdown("---")
-st.markdown("Alternatively, enter text directly:")
-direct_text = st.text_area("Enter your text here for direct Q&A:", height=150)
-direct_question = st.text_input("Ask a question about the direct text:")
+
+# Direct Text Q&A Section
+st.subheader("Ask Questions About Direct Text")
+direct_text = st.text_area("Enter your text here:", height=150)
+direct_question = st.text_input("Your Question:")
 
 if direct_text and direct_question:
-    try:
-        response = llm(f"{direct_text}\n\nQuestion: {direct_question}\nAnswer:")
-        st.success(response)
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
+    with st.spinner("Generating answer..."):
+        try:
+            response = llm(f"{direct_text}\n\nQuestion: {direct_question}\nAnswer:")
+            st.success(f"Answer: {response}")
+        except Exception as e:
+            st.error(f"Error generating answer: {e}")
