@@ -24,6 +24,15 @@ st.sidebar.markdown(
     - Ask questions about any direct text you provide.
     """
 )
+st.sidebar.markdown(
+    """
+    ### Instructions:
+    1. Upload a document or enter direct text.
+    2. Type your question in the input box.
+    3. Click "Submit" to get the answer.
+    """
+)
+st.sidebar.markdown("Developed by Balasundaram, Avudai Nayagam")
 # Document Q&A Section
 st.subheader("Ask Questions About a Document")
 uploaded_file = st.file_uploader("Upload a text or PDF document", type=["txt", "pdf"])
